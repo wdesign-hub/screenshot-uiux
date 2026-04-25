@@ -21,10 +21,6 @@ When conducting visual audits or gathering references, standard screenshot exten
 2. Clone this repository or download the `crawler.py` file.
 3. Install the required dependencies via your terminal:
 
-```
-```text?code_stdout&code_event_index=2
-File saved to /mnt/data/README.md
-
 ```bash
 pip install selenium tqdm
 ```
