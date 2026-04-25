@@ -6,390 +6,513 @@
     <title>Screenshot UI/UX | Headless Crawler</title>
     <style>
         :root {
-            --bg-color: #000000;
-            --text-main: #f5f5f7;
-            --text-muted: #86868b;
-            --glass-bg: rgba(255, 255, 255, 0.03);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --glass-hover: rgba(255, 255, 255, 0.06);
-            --accent: #2997ff;
-            --success: #30d158;
+            --bg: #050505;
+            --text-main: #ffffff;
+            --text-muted: #888888;
+            --accent: #ffffff;
+            --glass-bg: rgba(255, 255, 255, 0.02);
+            --glass-border: rgba(255, 255, 255, 0.05);
+            --glass-highlight: rgba(255, 255, 255, 0.1);
         }
 
-        body {
-            background-color: var(--bg-color);
-            background-image: 
-                radial-gradient(circle at 15% 50%, rgba(41, 151, 255, 0.08), transparent 40%),
-                radial-gradient(circle at 85% 30%, rgba(147, 51, 234, 0.08), transparent 40%);
-            background-attachment: fixed;
-            color: var(--text-main);
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.6;
+        @font-face {
+            font-family: 'Clash Display';
+            src: url('https://api.fontshare.com/v2/css?f[]=clash-display@600,500,400&display=swap');
+        }
+
+        body, html {
             margin: 0;
-            padding: 80px 20px;
-            display: flex;
-            justify-content: center;
+            padding: 0;
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+            overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
         }
 
-        .container {
-            max-width: 760px;
+        /* Subtle Grain Overlay */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.04;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        .nav {
+            position: fixed;
+            top: 0;
             width: 100%;
-        }
-
-        /* Animations */
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .animate-up {
-            animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-            opacity: 0;
-        }
-        
-        .delay-1 { animation-delay: 0.1s; }
-        .delay-2 { animation-delay: 0.2s; }
-        .delay-3 { animation-delay: 0.3s; }
-        .delay-4 { animation-delay: 0.4s; }
-
-        .header {
-            text-align: center;
-            margin-bottom: 50px;
-        }
-        
-        .logo-container {
-            margin-bottom: 24px;
+            padding: 40px 60px;
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
+            align-items: center;
+            box-sizing: border-box;
+            z-index: 100;
+            mix-blend-mode: difference;
         }
 
-        .logo-container svg {
-            max-width: 100%;
-            height: auto;
-            filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.05));
-        }
-
-        h1 {
-            font-size: 3.5rem;
-            font-weight: 700;
-            letter-spacing: -0.04em;
-            margin: 10px 0;
-            background: linear-gradient(180deg, #ffffff, #86868b);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .subtitle {
-            color: var(--text-muted);
-            font-size: 1.25rem;
-            font-weight: 400;
-            letter-spacing: -0.01em;
-            margin-bottom: 24px;
-        }
-
-        .badge {
-            display: inline-block;
-            background: rgba(48, 209, 88, 0.1);
-            color: var(--success);
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-            border: 1px solid rgba(48, 209, 88, 0.2);
-            margin-bottom: 15px;
+        .nav svg {
+            height: 28px;
+            width: auto;
         }
 
         .repo-link {
-            display: inline-flex;
-            align-items: center;
-            padding: 12px 24px;
-            background: rgba(255, 255, 255, 0.05);
-            color: #fff;
+            font-family: 'SF Pro Text', sans-serif;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-main);
             text-decoration: none;
-            border-radius: 30px;
-            font-size: 0.95rem;
-            font-weight: 500;
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            padding: 12px 24px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 40px;
+            transition: background 0.3s ease, color 0.3s ease;
         }
 
         .repo-link:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: scale(1.02);
-            border-color: rgba(255, 255, 255, 0.2);
+            background: var(--text-main);
+            color: var(--bg);
         }
 
-        .glass-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 40px;
-            margin-bottom: 24px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), background 0.4s ease;
-        }
-
-        .glass-card:hover {
-            transform: translateY(-2px);
-            background: var(--glass-hover);
-        }
-
-        h2 {
-            font-size: 1.4rem;
-            font-weight: 600;
-            letter-spacing: -0.02em;
-            margin-top: 0;
-            margin-bottom: 20px;
+        /* Hero Section */
+        .hero {
+            height: 100vh;
             display: flex;
-            align-items: center;
-            color: #ffffff;
-        }
-
-        .step-number {
-            display: flex;
-            align-items: center;
+            flex-direction: column;
             justify-content: center;
-            background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.02));
-            border: 1px solid var(--glass-border);
-            color: #fff;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            margin-right: 16px;
-            font-size: 1rem;
-            font-weight: 600;
-            box-shadow: inset 0 1px 2px rgba(255,255,255,0.1);
+            padding: 0 60px;
+            position: relative;
         }
 
-        p {
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            width: 60%;
+        }
+
+        .hero-title-wrapper {
+            overflow: hidden;
+            line-height: 0.9;
+        }
+
+        .hero h1 {
+            font-family: 'Clash Display', sans-serif;
+            font-size: clamp(4rem, 9vw, 10rem);
+            font-weight: 500;
+            text-transform: uppercase;
+            margin: 0;
+            letter-spacing: -0.02em;
+            color: var(--text-main);
+            will-change: transform;
+        }
+
+        .hero p {
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            max-width: 550px;
+            margin-top: 40px;
+            font-weight: 400;
+            opacity: 0;
+        }
+
+        /* --- MONA LISA GSAP ELEMENT --- */
+        .mona-wrapper {
+            position: absolute;
+            right: 8%;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 28vw;
+            max-width: 420px;
+            aspect-ratio: 3 / 4;
+            z-index: 5;
+            perspective: 1200px; /* Crucial for the 3D tilt effect */
+            cursor: pointer;
+            transform-style: preserve-3d;
+            will-change: transform;
+        }
+
+        .mona-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+            /* Default state: desaturated, slightly dimmed, high contrast */
+            filter: grayscale(100%) brightness(0.7) contrast(1.15);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+            will-change: transform, filter;
+            transform-style: preserve-3d;
+        }
+
+        .mona-shine {
+            position: absolute;
+            inset: 0;
+            border-radius: 12px;
+            background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.25) 0%, transparent 60%);
+            mix-blend-mode: soft-light;
+            opacity: 0;
+            pointer-events: none;
+            will-change: transform, opacity;
+        }
+
+        /* Layout Grid */
+        .content-section {
+            padding: 100px 60px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            position: relative;
+            z-index: 10;
+            background: var(--bg); /* Prevents Mona from floating over content when scrolling */
+        }
+
+        .section-header {
+            font-family: 'Clash Display', sans-serif;
+            font-size: 3rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            margin-bottom: 60px;
+            grid-column: 1 / -1;
+            letter-spacing: -0.01em;
+        }
+
+        /* Liquid Glassmorphism Cards */
+        .glass-card {
+            background: linear-gradient(145deg, var(--glass-bg), rgba(255,255,255,0.01));
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid var(--glass-border);
+            border-top: 1px solid var(--glass-highlight);
+            border-left: 1px solid var(--glass-highlight);
+            border-radius: 2px;
+            padding: 60px 40px;
+            position: relative;
+            overflow: hidden;
+            will-change: transform, opacity;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.05) 0%, transparent 50%);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+        }
+
+        .glass-card:hover::before {
+            opacity: 1;
+        }
+
+        .step-num {
+            font-family: 'Clash Display', sans-serif;
+            font-size: 1rem;
             color: var(--text-muted);
             margin-bottom: 20px;
-            font-size: 1rem;
+            display: block;
         }
 
-        code {
-            background: rgba(0, 0, 0, 0.3);
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-family: "SF Mono", Consolas, monospace;
-            font-size: 0.9em;
-            color: #5ac8fa;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        /* Mac Terminal UI */
-        .mac-window {
-            background: #1e1e1e;
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.1);
-            overflow: hidden;
-            margin-top: 15px;
-            margin-bottom: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-
-        .mac-header {
-            background: #2d2d2d;
-            padding: 12px 16px;
-            display: flex;
-            gap: 8px;
-            border-bottom: 1px solid rgba(0,0,0,0.5);
-        }
-
-        .mac-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-        }
-
-        .mac-dot.red { background: #ff5f56; }
-        .mac-dot.yellow { background: #ffbd2e; }
-        .mac-dot.green { background: #27c93f; }
-
-        .mac-body pre {
-            background: transparent;
-            padding: 20px;
-            margin: 0;
-            overflow-x: auto;
-        }
-
-        .mac-body code {
-            background: none;
-            padding: 0;
-            border: none;
-            color: #f5f5f7;
-            font-size: 0.95em;
-            line-height: 1.5;
-        }
-
-        .highlight-box {
-            background: rgba(41, 151, 255, 0.08);
-            border-left: 3px solid var(--accent);
-            padding: 16px 20px;
-            border-radius: 0 12px 12px 0;
-            margin: 20px 0;
-        }
-
-        .highlight-box.success {
-            background: rgba(48, 209, 88, 0.08);
-            border-left-color: var(--success);
-        }
-
-        .highlight-box p {
-            margin: 0;
-            color: #d1d1d6;
-            font-size: 0.95rem;
-        }
-        
-        .feature-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 16px;
-            margin-top: 24px;
-        }
-        
-        .feature-item {
-            background: rgba(0,0,0,0.2);
-            border: 1px solid var(--glass-border);
-            padding: 20px;
-            border-radius: 16px;
-        }
-
-        .feature-item h3 {
-            color: #fff;
-            font-size: 1rem;
-            margin: 0 0 8px 0;
+        .glass-card h3 {
+            font-size: 1.5rem;
+            margin: 0 0 16px 0;
             font-weight: 500;
         }
 
-        .feature-item p {
-            margin: 0;
-            font-size: 0.9rem;
-            line-height: 1.4;
-        }
-
-        ol {
+        .glass-card p {
             color: var(--text-muted);
-            padding-left: 24px;
+            margin: 0 0 24px 0;
+            line-height: 1.5;
         }
 
-        ol li {
-            margin-bottom: 12px;
+        .mac-window {
+            background: #0f0f0f;
+            border-radius: 8px;
+            border: 1px solid var(--glass-border);
+            overflow: hidden;
+            margin-top: 20px;
         }
 
-        ol li strong {
-            color: #fff;
+        .mac-header {
+            background: #151515;
+            padding: 10px 16px;
+            display: flex;
+            gap: 6px;
+            border-bottom: 1px solid var(--glass-border);
         }
 
-        @media (max-width: 600px) {
-            body { padding: 40px 15px; }
-            .glass-card { padding: 30px 20px; }
-            h1 { font-size: 2.5rem; }
+        .mac-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .mac-dot.red { background: #333; }
+        .mac-dot.yellow { background: #444; }
+        .mac-dot.green { background: #555; }
+
+        .mac-body {
+            padding: 20px;
+            font-family: 'SF Mono', monospace;
+            font-size: 0.85rem;
+            color: #d1d1d6;
+            overflow-x: auto;
+        }
+
+        /* Loader */
+        .loader {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: var(--bg);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden; 
+        }
+        
+        .loader-text {
+            font-family: 'Clash Display', sans-serif;
+            color: var(--text-main);
+            font-size: 2rem;
+            overflow: hidden;
+        }
+
+        .l-text {
+            display: inline-block; 
+        }
+
+        @media (max-width: 900px) {
+            .hero-content { width: 100%; }
+            .mona-wrapper { opacity: 0.2; right: -10%; pointer-events: none; } /* Fade to background on mobile */
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 12vw; }
+            .content-section { grid-template-columns: 1fr; padding: 60px 20px; }
+            .nav { padding: 20px; }
+            .hero { padding: 0 20px; }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="header animate-up">
-        <div class="logo-container">
-            <svg width="179" height="38" viewBox="0 0 179 38" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M11.865 34.93C9.88167 34.93 8.34167 34.7317 7.245 34.335C6.17167 33.9617 5.425 33.3667 5.005 32.55C4.585 31.7333 4.375 30.6717 4.375 29.365V23.1C4.375 21.7933 4.00167 20.8717 3.255 20.335C2.53167 19.7983 1.44667 19.53 0 19.53V15.435C1.42333 15.435 2.50833 15.1667 3.255 14.63C4.00167 14.0933 4.375 13.1833 4.375 11.9V5.565C4.375 4.25833 4.585 3.19667 5.005 2.38C5.425 1.56333 6.17167 0.968333 7.245 0.594999C8.34167 0.198333 9.88167 0 11.865 0V3.85C10.9317 3.85 10.185 4.03667 9.625 4.41C9.08833 4.78333 8.82 5.55333 8.82 6.72V12.845C8.82 15.365 7.51333 16.87 4.9 17.36V17.57C7.51333 18.0367 8.82 19.5417 8.82 22.085V28.175C8.82 29.3183 9.08833 30.0767 9.625 30.45C10.185 30.8467 10.9317 31.045 11.865 31.045V34.93Z" fill="white"/>
-                <path d="M31.2473 22.435C31.154 22.0383 31.014 21.455 30.8273 20.685C30.664 19.8917 30.4773 19.0517 30.2673 18.165C30.0573 17.255 29.859 16.4267 29.6723 15.68C29.4857 14.91 29.3573 14.35 29.2873 14H29.1473C29.0773 14.35 28.949 14.91 28.7623 15.68C28.599 16.4267 28.4123 17.255 28.2023 18.165C27.9923 19.0517 27.794 19.8917 27.6073 20.685C27.4207 21.4783 27.2807 22.085 27.1873 22.505L25.6473 29.12H20.0473L14.6223 10.01H19.8023L22.0073 18.48C22.1707 19.0633 22.3107 19.7633 22.4273 20.58C22.5673 21.3967 22.6957 22.19 22.8123 22.96C22.929 23.7067 23.0107 24.3017 23.0573 24.745H23.1973C23.2207 24.4183 23.2673 23.9867 23.3373 23.45C23.4073 22.89 23.489 22.3183 23.5823 21.735C23.699 21.1517 23.7923 20.6267 23.8623 20.16C23.9557 19.67 24.0257 19.3433 24.0723 19.18L26.4173 10.01H32.1573L34.3973 19.18C34.4907 19.5067 34.5957 20.0317 34.7123 20.755C34.8523 21.4783 34.969 22.2133 35.0623 22.96C35.179 23.7067 35.2373 24.3017 35.2373 24.745H35.3773C35.424 24.3483 35.5057 23.7767 35.6223 23.03C35.739 22.26 35.8673 21.455 36.0073 20.615C36.1707 19.775 36.334 19.0633 36.4973 18.48L38.7723 10.01H43.8823L38.3873 29.12H32.7173L31.2473 22.435Z" fill="white"/>
-                <path d="M53.7329 29.47C51.6096 29.47 49.8713 28.6417 48.5179 26.985C47.1879 25.305 46.5229 22.8433 46.5229 19.6C46.5229 16.3333 47.1996 13.86 48.5529 12.18C49.9063 10.5 51.6796 9.66 53.8729 9.66C54.7829 9.66 55.5879 9.78833 56.2879 10.045C56.9879 10.2783 57.5829 10.605 58.0729 11.025C58.5863 11.445 59.0179 11.9233 59.3679 12.46H59.5429C59.4729 12.0867 59.3913 11.55 59.2979 10.85C59.2046 10.1267 59.1579 9.39167 59.1579 8.645V2.52H64.3729V29.12H60.3829L59.3679 26.635H59.1579C58.8313 27.1483 58.4113 27.6267 57.8979 28.07C57.4079 28.49 56.8246 28.8283 56.1479 29.085C55.4713 29.3417 54.6663 29.47 53.7329 29.47ZM55.5529 25.305C56.9996 25.305 58.0146 24.885 58.5979 24.045C59.1813 23.1817 59.4846 21.8983 59.5079 20.195V19.635C59.5079 17.7683 59.2163 16.345 58.6329 15.365C58.0729 14.385 57.0229 13.895 55.4829 13.895C54.3396 13.895 53.4413 14.3967 52.7879 15.4C52.1346 16.38 51.8079 17.8033 51.8079 19.67C51.8079 21.5367 52.1346 22.9483 52.7879 23.905C53.4413 24.8383 54.3629 25.305 55.5529 25.305Z" fill="white"/>
-                <path d="M78.4014 9.66C80.1747 9.66 81.6914 9.99833 82.9514 10.675C84.2347 11.3517 85.2264 12.3317 85.9264 13.615C86.6264 14.8983 86.9764 16.4733 86.9764 18.34V20.86H74.6564C74.703 22.33 75.1347 23.485 75.9514 24.325C76.7914 25.165 77.9464 25.585 79.4164 25.585C80.653 25.585 81.773 25.4683 82.7764 25.235C83.7797 24.9783 84.818 24.5933 85.8914 24.08V28.105C84.958 28.5717 83.9664 28.91 82.9164 29.12C81.8897 29.3533 80.6414 29.47 79.1714 29.47C77.258 29.47 75.5664 29.12 74.0964 28.42C72.6264 27.6967 71.4714 26.6117 70.6314 25.165C69.7914 23.7183 69.3714 21.8983 69.3714 19.705C69.3714 17.465 69.7447 15.61 70.4914 14.14C71.2614 12.6467 72.323 11.5267 73.6764 10.78C75.0297 10.0333 76.6047 9.66 78.4014 9.66ZM78.4364 13.37C77.433 13.37 76.593 13.6967 75.9164 14.35C75.263 15.0033 74.878 16.0183 74.7614 17.395H82.0764C82.0764 16.625 81.9364 15.9367 81.6564 15.33C81.3997 14.7233 81.003 14.245 80.4664 13.895C79.9297 13.545 79.253 13.37 78.4364 13.37Z" fill="white"/>
-                <path d="M105.24 23.45C105.24 24.7333 104.937 25.83 104.33 26.74C103.723 27.6267 102.813 28.3033 101.6 28.77C100.387 29.2367 98.8818 29.47 97.0851 29.47C95.7551 29.47 94.6117 29.3767 93.6551 29.19C92.6984 29.0267 91.7417 28.7467 90.7851 28.35V24.045C91.8117 24.5117 92.9201 24.8967 94.1101 25.2C95.3001 25.5033 96.3501 25.655 97.2601 25.655C98.2867 25.655 99.0101 25.5033 99.4301 25.2C99.8734 24.8967 100.095 24.5 100.095 24.01C100.095 23.6833 100.002 23.3917 99.8151 23.135C99.6517 22.8783 99.2784 22.5867 98.6951 22.26C98.1117 21.9333 97.2017 21.5133 95.9651 21C94.7751 20.4867 93.7951 19.985 93.0251 19.495C92.2551 18.9817 91.6834 18.375 91.3101 17.675C90.9367 16.9517 90.7501 16.0533 90.7501 14.98C90.7501 13.2067 91.4384 11.8767 92.8151 10.99C94.1917 10.1033 96.0234 9.66 98.3101 9.66C99.5001 9.66 100.632 9.77667 101.705 10.01C102.778 10.2433 103.887 10.6283 105.03 11.165L103.455 14.91C102.825 14.63 102.218 14.385 101.635 14.175C101.052 13.965 100.48 13.8017 99.9201 13.685C99.3834 13.5683 98.8234 13.51 98.2401 13.51C97.4701 13.51 96.8867 13.615 96.4901 13.825C96.1167 14.035 95.9301 14.35 95.9301 14.77C95.9301 15.0733 96.0234 15.3533 96.2101 15.61C96.4201 15.8433 96.8051 16.1 97.3651 16.38C97.9484 16.66 98.8001 17.0333 99.9201 17.5C101.017 17.9433 101.962 18.41 102.755 18.9C103.548 19.3667 104.155 19.9617 104.575 20.685C105.018 21.385 105.24 22.3067 105.24 23.45Z" fill="white"/>
-                <path d="M115.218 10.01V29.12H110.003V10.01H115.218ZM112.628 2.52C113.398 2.52 114.063 2.70667 114.623 3.08C115.183 3.43 115.463 4.095 115.463 5.075C115.463 6.03167 115.183 6.69667 114.623 7.07C114.063 7.44333 113.398 7.63 112.628 7.63C111.834 7.63 111.158 7.44333 110.598 7.07C110.061 6.69667 109.793 6.03167 109.793 5.075C109.793 4.095 110.061 3.43 110.598 3.08C111.158 2.70667 111.834 2.52 112.628 2.52Z" fill="white"/>
-                <path d="M127.562 9.66C128.728 9.66 129.778 9.89333 130.712 10.36C131.645 10.8267 132.438 11.5267 133.092 12.46H133.232L133.652 10.01H138.062V29.155C138.062 30.975 137.7 32.5033 136.977 33.74C136.277 34.9767 135.215 35.91 133.792 36.54C132.368 37.1933 130.607 37.52 128.507 37.52C127.153 37.52 125.893 37.4383 124.727 37.275C123.583 37.1117 122.463 36.82 121.367 36.4V32.235C122.16 32.5617 122.953 32.83 123.747 33.04C124.563 33.2733 125.392 33.4367 126.232 33.53C127.095 33.6467 127.958 33.705 128.822 33.705C130.175 33.705 131.178 33.3433 131.832 32.62C132.508 31.8967 132.847 30.8117 132.847 29.365V28.98C132.847 28.5833 132.858 28.175 132.882 27.755C132.928 27.335 132.963 26.9617 132.987 26.635H132.847C132.193 27.6383 131.412 28.3617 130.502 28.805C129.592 29.2483 128.565 29.47 127.422 29.47C125.158 29.47 123.385 28.6067 122.102 26.88C120.842 25.13 120.212 22.7033 120.212 19.6C120.212 17.5 120.503 15.715 121.087 14.245C121.67 12.7517 122.51 11.62 123.607 10.85C124.727 10.0567 126.045 9.66 127.562 9.66ZM129.207 13.895C128.39 13.895 127.702 14.1167 127.142 14.56C126.605 14.98 126.197 15.6217 125.917 16.485C125.66 17.325 125.532 18.3867 125.532 19.67C125.532 21.5833 125.835 23.0183 126.442 23.975C127.048 24.9083 127.993 25.375 129.277 25.375C129.953 25.375 130.537 25.2933 131.027 25.13C131.517 24.9433 131.913 24.6517 132.217 24.255C132.543 23.835 132.788 23.2983 132.952 22.645C133.115 21.9917 133.197 21.1983 133.197 20.265V19.635C133.197 18.2583 133.057 17.15 132.777 16.31C132.497 15.47 132.065 14.8633 131.482 14.49C130.898 14.0933 130.14 13.895 129.207 13.895Z" fill="white"/>
-                <path d="M155.065 9.66C157.118 9.66 158.763 10.22 160 11.34C161.237 12.4367 161.855 14.21 161.855 16.66V29.12H156.64V17.955C156.64 16.5783 156.395 15.5517 155.905 14.875C155.415 14.175 154.633 13.825 153.56 13.825C151.973 13.825 150.888 14.3733 150.305 15.47C149.722 16.5433 149.43 18.095 149.43 20.125V29.12H144.215V10.01H148.205L148.905 12.46H149.185C149.605 11.8067 150.118 11.2817 150.725 10.885C151.332 10.465 152.008 10.1617 152.755 9.975C153.502 9.765 154.272 9.66 155.065 9.66Z" fill="white"/>
-                <path d="M166.903 34.93V31.045C167.836 31.045 168.571 30.8467 169.108 30.45C169.668 30.0767 169.948 29.3183 169.948 28.175V22.085C169.948 19.5417 171.255 18.0367 173.868 17.57V17.36C171.255 16.87 169.948 15.365 169.948 12.845V6.72C169.948 5.55333 169.668 4.78333 169.108 4.41C168.571 4.03667 167.836 3.85 166.903 3.85V0C168.91 0 170.45 0.198333 171.523 0.594999C172.596 0.968333 173.343 1.56333 173.763 2.38C174.183 3.19667 174.393 4.25833 174.393 5.565V11.9C174.393 13.1833 174.766 14.0933 175.513 14.63C176.26 15.1667 177.345 15.435 178.768 15.435V19.53C177.345 19.53 176.26 19.7983 175.513 20.335C174.766 20.8717 174.393 21.7933 174.393 23.1V29.365C174.393 30.6717 174.183 31.7333 173.763 32.55C173.343 33.3667 172.596 33.9617 171.523 34.335C170.45 34.7317 168.91 34.93 166.903 34.93Z" fill="white"/>
-            </svg>
-        </div>
-        <div class="badge">v2.0 UI Update</div>
-        <h1>Screenshot UI/UX</h1>
-        <div class="subtitle">Headless architecture crawler for visual audits.</div>
-        <a href="https://github.com/wdesign-hub/screenshot-uiux" class="repo-link" target="_blank">
-            View Repository on GitHub
-        </a>
+    <div class="loader">
+        <div class="loader-text"><span class="l-text">INITIALIZING</span></div>
     </div>
 
-    <div class="glass-card animate-up delay-1">
-        <h2><span class="step-number">1</span> Environment Setup</h2>
-        <p>Ensure Python is installed, then pull the required dependencies via your terminal:</p>
-        
-        <div class="mac-window">
-            <div class="mac-header">
-                <div class="mac-dot red"></div>
-                <div class="mac-dot yellow"></div>
-                <div class="mac-dot green"></div>
-            </div>
-            <div class="mac-body">
-                <pre><code>pip install selenium tqdm</code></pre>
-            </div>
-        </div>
-        
-        <div class="highlight-box">
-            <p><strong>Note for macOS:</strong> If the environment fails, alias to Python 3 using <code>pip3 install selenium tqdm</code>.</p>
-        </div>
-    </div>
+    <nav class="nav">
+        <svg width="179" height="38" viewBox="0 0 179 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M11.865 34.93C9.88167 34.93 8.34167 34.7317 7.245 34.335C6.17167 33.9617 5.425 33.3667 5.005 32.55C4.585 31.7333 4.375 30.6717 4.375 29.365V23.1C4.375 21.7933 4.00167 20.8717 3.255 20.335C2.53167 19.7983 1.44667 19.53 0 19.53V15.435C1.42333 15.435 2.50833 15.1667 3.255 14.63C4.00167 14.0933 4.375 13.1833 4.375 11.9V5.565C4.375 4.25833 4.585 3.19667 5.005 2.38C5.425 1.56333 6.17167 0.968333 7.245 0.594999C8.34167 0.198333 9.88167 0 11.865 0V3.85C10.9317 3.85 10.185 4.03667 9.625 4.41C9.08833 4.78333 8.82 5.55333 8.82 6.72V12.845C8.82 15.365 7.51333 16.87 4.9 17.36V17.57C7.51333 18.0367 8.82 19.5417 8.82 22.085V28.175C8.82 29.3183 9.08833 30.0767 9.625 30.45C10.185 30.8467 10.9317 31.045 11.865 31.045V34.93Z" fill="white"/>
+            <path d="M31.2473 22.435C31.154 22.0383 31.014 21.455 30.8273 20.685C30.664 19.8917 30.4773 19.0517 30.2673 18.165C30.0573 17.255 29.859 16.4267 29.6723 15.68C29.4857 14.91 29.3573 14.35 29.2873 14H29.1473C29.0773 14.35 28.949 14.91 28.7623 15.68C28.599 16.4267 28.4123 17.255 28.2023 18.165C27.9923 19.0517 27.794 19.8917 27.6073 20.685C27.4207 21.4783 27.2807 22.085 27.1873 22.505L25.6473 29.12H20.0473L14.6223 10.01H19.8023L22.0073 18.48C22.1707 19.0633 22.3107 19.7633 22.4273 20.58C22.5673 21.3967 22.6957 22.19 22.8123 22.96C22.929 23.7067 23.0107 24.3017 23.0573 24.745H23.1973C23.2207 24.4183 23.2673 23.9867 23.3373 23.45C23.4073 22.89 23.489 22.3183 23.5823 21.735C23.699 21.1517 23.7923 20.6267 23.8623 20.16C23.9557 19.67 24.0257 19.3433 24.0723 19.18L26.4173 10.01H32.1573L34.3973 19.18C34.4907 19.5067 34.5957 20.0317 34.7123 20.755C34.8523 21.4783 34.969 22.2133 35.0623 22.96C35.179 23.7067 35.2373 24.3017 35.2373 24.745H35.3773C35.424 24.3483 35.5057 23.7767 35.6223 23.03C35.739 22.26 35.8673 21.455 36.0073 20.615C36.1707 19.775 36.334 19.0633 36.4973 18.48L38.7723 10.01H43.8823L38.3873 29.12H32.7173L31.2473 22.435Z" fill="white"/>
+            <path d="M53.7329 29.47C51.6096 29.47 49.8713 28.6417 48.5179 26.985C47.1879 25.305 46.5229 22.8433 46.5229 19.6C46.5229 16.3333 47.1996 13.86 48.5529 12.18C49.9063 10.5 51.6796 9.66 53.8729 9.66C54.7829 9.66 55.5879 9.78833 56.2879 10.045C56.9879 10.2783 57.5829 10.605 58.0729 11.025C58.5863 11.445 59.0179 11.9233 59.3679 12.46H59.5429C59.4729 12.0867 59.3913 11.55 59.2979 10.85C59.2046 10.1267 59.1579 9.39167 59.1579 8.645V2.52H64.3729V29.12H60.3829L59.3679 26.635H59.1579C58.8313 27.1483 58.4113 27.6267 57.8979 28.07C57.4079 28.49 56.8246 28.8283 56.1479 29.085C55.4713 29.3417 54.6663 29.47 53.7329 29.47ZM55.5529 25.305C56.9996 25.305 58.0146 24.885 58.5979 24.045C59.1813 23.1817 59.4846 21.8983 59.5079 20.195V19.635C59.5079 17.7683 59.2163 16.345 58.6329 15.365C58.0729 14.385 57.0229 13.895 55.4829 13.895C54.3396 13.895 53.4413 14.3967 52.7879 15.4C52.1346 16.38 51.8079 17.8033 51.8079 19.67C51.8079 21.5367 52.1346 22.9483 52.7879 23.905C53.4413 24.8383 54.3629 25.305 55.5529 25.305Z" fill="white"/>
+            <path d="M78.4014 9.66C80.1747 9.66 81.6914 9.99833 82.9514 10.675C84.2347 11.3517 85.2264 12.3317 85.9264 13.615C86.6264 14.8983 86.9764 16.4733 86.9764 18.34V20.86H74.6564C74.703 22.33 75.1347 23.485 75.9514 24.325C76.7914 25.165 77.9464 25.585 79.4164 25.585C80.653 25.585 81.773 25.4683 82.7764 25.235C83.7797 24.9783 84.818 24.5933 85.8914 24.08V28.105C84.958 28.5717 83.9664 28.91 82.9164 29.12C81.8897 29.3533 80.6414 29.47 79.1714 29.47C77.258 29.47 75.5664 29.12 74.0964 28.42C72.6264 27.6967 71.4714 26.6117 70.6314 25.165C69.7914 23.7183 69.3714 21.8983 69.3714 19.705C69.3714 17.465 69.7447 15.61 70.4914 14.14C71.2614 12.6467 72.323 11.5267 73.6764 10.78C75.0297 10.0333 76.6047 9.66 78.4014 9.66ZM78.4364 13.37C77.433 13.37 76.593 13.6967 75.9164 14.35C75.263 15.0033 74.878 16.0183 74.7614 17.395H82.0764C82.0764 16.625 81.9364 15.9367 81.6564 15.33C81.3997 14.7233 81.003 14.245 80.4664 13.895C79.9297 13.545 79.253 13.37 78.4364 13.37Z" fill="white"/>
+            <path d="M105.24 23.45C105.24 24.7333 104.937 25.83 104.33 26.74C103.723 27.6267 102.813 28.3033 101.6 28.77C100.387 29.2367 98.8818 29.47 97.0851 29.47C95.7551 29.47 94.6117 29.3767 93.6551 29.19C92.6984 29.0267 91.7417 28.7467 90.7851 28.35V24.045C91.8117 24.5117 92.9201 24.8967 94.1101 25.2C95.3001 25.5033 96.3501 25.655 97.2601 25.655C98.2867 25.655 99.0101 25.5033 99.4301 25.2C99.8734 24.8967 100.095 24.5 100.095 24.01C100.095 23.6833 100.002 23.3917 99.8151 23.135C99.6517 22.8783 99.2784 22.5867 98.6951 22.26C98.1117 21.9333 97.2017 21.5133 95.9651 21C94.7751 20.4867 93.7951 19.985 93.0251 19.495C92.2551 18.9817 91.6834 18.375 91.3101 17.675C90.9367 16.9517 90.7501 16.0533 90.7501 14.98C90.7501 13.2067 91.4384 11.8767 92.8151 10.99C94.1917 10.1033 96.0234 9.66 98.3101 9.66C99.5001 9.66 100.632 9.77667 101.705 10.01C102.778 10.2433 103.887 10.6283 105.03 11.165L103.455 14.91C102.825 14.63 102.218 14.385 101.635 14.175C101.052 13.965 100.48 13.8017 99.9201 13.685C99.3834 13.5683 98.8234 13.51 98.2401 13.51C97.4701 13.51 96.8867 13.615 96.4901 13.825C96.1167 14.035 95.9301 14.35 95.9301 14.77C95.9301 15.0733 96.0234 15.3533 96.2101 15.61C96.4201 15.8433 96.8051 16.1 97.3651 16.38C97.9484 16.66 98.8001 17.0333 99.9201 17.5C101.017 17.9433 101.962 18.41 102.755 18.9C103.548 19.3667 104.155 19.9617 104.575 20.685C105.018 21.385 105.24 22.3067 105.24 23.45Z" fill="white"/>
+            <path d="M115.218 10.01V29.12H110.003V10.01H115.218ZM112.628 2.52C113.398 2.52 114.063 2.70667 114.623 3.08C115.183 3.43 115.463 4.095 115.463 5.075C115.463 6.03167 115.183 6.69667 114.623 7.07C114.063 7.44333 113.398 7.63 112.628 7.63C111.834 7.63 111.158 7.44333 110.598 7.07C110.061 6.69667 109.793 6.03167 109.793 5.075C109.793 4.095 110.061 3.43 110.598 3.08C111.158 2.70667 111.834 2.52 112.628 2.52Z" fill="white"/>
+            <path d="M127.562 9.66C128.728 9.66 129.778 9.89333 130.712 10.36C131.645 10.8267 132.438 11.5267 133.092 12.46H133.232L133.652 10.01H138.062V29.155C138.062 30.975 137.7 32.5033 136.977 33.74C136.277 34.9767 135.215 35.91 133.792 36.54C132.368 37.1933 130.607 37.52 128.507 37.52C127.153 37.52 125.893 37.4383 124.727 37.275C123.583 37.1117 122.463 36.82 121.367 36.4V32.235C122.16 32.5617 122.953 32.83 123.747 33.04C124.563 33.2733 125.392 33.4367 126.232 33.53C127.095 33.6467 127.958 33.705 128.822 33.705C130.175 33.705 131.178 33.3433 131.832 32.62C132.508 31.8967 132.847 30.8117 132.847 29.365V28.98C132.847 28.5833 132.858 28.175 132.882 27.755C132.928 27.335 132.963 26.9617 132.987 26.635H132.847C132.193 27.6383 131.412 28.3617 130.502 28.805C129.592 29.2483 128.565 29.47 127.422 29.47C125.158 29.47 123.385 28.6067 122.102 26.88C120.842 25.13 120.212 22.7033 120.212 19.6C120.212 17.5 120.503 15.715 121.087 14.245C121.67 12.7517 122.51 11.62 123.607 10.85C124.727 10.0567 126.045 9.66 127.562 9.66ZM129.207 13.895C128.39 13.895 127.702 14.1167 127.142 14.56C126.605 14.98 126.197 15.6217 125.917 16.485C125.66 17.325 125.532 18.3867 125.532 19.67C125.532 21.5833 125.835 23.0183 126.442 23.975C127.048 24.9083 127.993 25.375 129.277 25.375C129.953 25.375 130.537 25.2933 131.027 25.13C131.517 24.9433 131.913 24.6517 132.217 24.255C132.543 23.835 132.788 23.2983 132.952 22.645C133.115 21.9917 133.197 21.1983 133.197 20.265V19.635C133.197 18.2583 133.057 17.15 132.777 16.31C132.497 15.47 132.065 14.8633 131.482 14.49C130.898 14.0933 130.14 13.895 129.207 13.895Z" fill="white"/>
+            <path d="M155.065 9.66C157.118 9.66 158.763 10.22 160 11.34C161.237 12.4367 161.855 14.21 161.855 16.66V29.12H156.64V17.955C156.64 16.5783 156.395 15.5517 155.905 14.875C155.415 14.175 154.633 13.825 153.56 13.825C151.973 13.825 150.888 14.3733 150.305 15.47C149.722 16.5433 149.43 18.095 149.43 20.125V29.12H144.215V10.01H148.205L148.905 12.46H149.185C149.605 11.8067 150.118 11.2817 150.725 10.885C151.332 10.465 152.008 10.1617 152.755 9.975C153.502 9.765 154.272 9.66 155.065 9.66Z" fill="white"/>
+            <path d="M166.903 34.93V31.045C167.836 31.045 168.571 30.8467 169.108 30.45C169.668 30.0767 169.948 29.3183 169.948 28.175V22.085C169.948 19.5417 171.255 18.0367 173.868 17.57V17.36C171.255 16.87 169.948 15.365 169.948 12.845V6.72C169.948 5.55333 169.668 4.78333 169.108 4.41C168.571 4.03667 167.836 3.85 166.903 3.85V0C168.91 0 170.45 0.198333 171.523 0.594999C172.596 0.968333 173.343 1.56333 173.763 2.38C174.183 3.19667 174.393 4.25833 174.393 5.565V11.9C174.393 13.1833 174.766 14.0933 175.513 14.63C176.26 15.1667 177.345 15.435 178.768 15.435V19.53C177.345 19.53 176.26 19.7983 175.513 20.335C174.766 20.8717 174.393 21.7933 174.393 23.1V29.365C174.393 30.6717 174.183 31.7333 173.763 32.55C173.343 33.3667 172.596 33.9617 171.523 34.335C170.45 34.7317 168.91 34.93 166.903 34.93Z" fill="white"/>
+        </svg>
+        <a href="https://github.com/wdesign-hub/screenshot-uiux" class="repo-link">View Repository</a>
+    </nav>
 
-    <div class="glass-card animate-up delay-2">
-        <h2><span class="step-number">2</span> Initialize Crawler</h2>
-        <p>Launch the crawler globally using your terminal's drag-and-drop pathing.</p>
-        <ol>
-            <li>Launch <strong>Terminal</strong> (macOS) or <strong>Command Prompt</strong> (Windows).</li>
-            <li>Type <code>python </code> <em>(include the trailing space)</em>.</li>
-            <li>Drag and drop the <code>crawler.py</code> file directly into the terminal window.</li>
-            <li>Press <strong>Enter</strong> to execute.</li>
-        </ol>
-    </div>
-
-    <div class="glass-card animate-up delay-3">
-        <h2><span class="step-number">3</span> The Capture Pipeline</h2>
-        <p>The script initiates an interactive session to define the scope of the audit:</p>
-        
-        <div class="mac-window">
-            <div class="mac-header">
-                <div class="mac-dot red"></div>
-                <div class="mac-dot yellow"></div>
-                <div class="mac-dot green"></div>
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-title-wrapper">
+                <h1 class="h-text">Headless</h1>
             </div>
-            <div class="mac-body">
-                <pre><code>Enter the starting URL (e.g., https://example.com): https://webflow.com
-Enter the maximum number of pages to capture: 15</code></pre>
+            <div class="hero-title-wrapper">
+                <h1 class="h-text">Architecture</h1>
             </div>
-        </div>
-        
-        <div class="highlight-box success">
-            <p><strong>Native Folder Picker:</strong> A system OS window will trigger automatically to select or create your destination directory.</p>
+            <div class="hero-title-wrapper">
+                <h1 class="h-text">Crawler</h1>
+            </div>
+            <p class="hero-sub">Automate visual audits. A pure python engine engineered to render GSAP interactions and destroy cookie banners natively before capture.</p>
         </div>
 
-        <div class="feature-grid">
-            <div class="feature-item">
-                <h3>🕸️ Topology Mapping</h3>
-                <p>Recursively extracts internal links up to your defined limit.</p>
-            </div>
-            <div class="feature-item">
-                <h3>🎞️ Scroll & Settle</h3>
-                <p>Forces lazy-loaded DOM assets and GSAP animations to render.</p>
-            </div>
-            <div class="feature-item">
-                <h3>🧹 DOM Cleansing</h3>
-                <p>Detects and destroys sticky cookie banners before snapping.</p>
-            </div>
-            <div class="feature-item">
-                <h3>📸 CDP Captures</h3>
-                <p>Executes native Chrome protocols for stitch-free images.</p>
+        <!-- The Mona Lisa GSAP Element -->
+        <div class="mona-wrapper">
+            <img src="assets/monalisa.jpg" alt="Mona Lisa" class="mona-img">
+            <div class="mona-shine"></div>
+        </div>
+    </section>
+
+    <section class="content-section">
+        <div class="section-header">The Pipeline</div>
+        
+        <div class="glass-card g-card">
+            <span class="step-num">01. Setup</span>
+            <h3>Environment Config</h3>
+            <p>Ensure Python is installed, then pull the required dependencies via your terminal.</p>
+            <div class="mac-window">
+                <div class="mac-header">
+                    <div class="mac-dot red"></div>
+                    <div class="mac-dot yellow"></div>
+                    <div class="mac-dot green"></div>
+                </div>
+                <div class="mac-body">pip install selenium tqdm</div>
             </div>
         </div>
-    </div>
-</div>
 
+        <div class="glass-card g-card">
+            <span class="step-num">02. Init</span>
+            <h3>Launch Crawler</h3>
+            <p>Launch the crawler globally using your terminal's drag-and-drop pathing.</p>
+            <div class="mac-window">
+                <div class="mac-header">
+                    <div class="mac-dot red"></div>
+                    <div class="mac-dot yellow"></div>
+                    <div class="mac-dot green"></div>
+                </div>
+                <div class="mac-body">python crawler.py</div>
+            </div>
+        </div>
+
+        <div class="glass-card g-card">
+            <span class="step-num">03. Target</span>
+            <h3>Define Audit Scope</h3>
+            <p>The script initiates an interactive session to define the URL target and limit.</p>
+            <div class="mac-window">
+                <div class="mac-header">
+                    <div class="mac-dot red"></div>
+                    <div class="mac-dot yellow"></div>
+                    <div class="mac-dot green"></div>
+                </div>
+                <div class="mac-body">Enter URL: https://webflow.com</div>
+            </div>
+        </div>
+
+        <div class="glass-card g-card">
+            <span class="step-num">04. Extract</span>
+            <h3>Capture Protocol</h3>
+            <p>The engine scrolls to force lazy-loaded assets, neutralizes popups, and captures CDP standard imagery.</p>
+            <div class="mac-window">
+                <div class="mac-header">
+                    <div class="mac-dot red"></div>
+                    <div class="mac-dot yellow"></div>
+                    <div class="mac-dot green"></div>
+                </div>
+                <div class="mac-body">Snapping: /design-system ... DONE</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- GSAP Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.19/bundled/lenis.min.js"></script>
+
+    <script>
+        // Smooth Scrolling setup (Lenis)
+        const lenis = new Lenis({ duration: 1.2, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
+        function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+        requestAnimationFrame(raf);
+
+        gsap.registerPlugin(ScrollTrigger);
+
+        const monaWrapper = document.querySelector('.mona-wrapper');
+        const monaImg = document.querySelector('.mona-img');
+        const monaShine = document.querySelector('.mona-shine');
+
+        // Initial Loader Timeline
+        const tl = gsap.timeline();
+
+        tl.to(".l-text", { y: "-100%", duration: 0.8, ease: "power4.inOut", delay: 0.5 })
+          .to(".loader", { height: 0, duration: 1, ease: "power4.inOut" })
+          .from(".h-text", { y: "100%", duration: 1.2, ease: "power4.out", stagger: 0.1 }, "-=0.5")
+          .from(".mona-wrapper", { clipPath: "inset(0 0 100% 0)", duration: 1.4, ease: "power4.out" }, "-=1.2")
+          .from(monaImg, { scale: 1.3, filter: "grayscale(100%) brightness(0.5)", duration: 1.6, ease: "power3.out" }, "<")
+          .to(".hero-sub", { opacity: 1, y: 0, duration: 1, ease: "power3.out" }, "-=1.2")
+          .from(".nav", { y: -50, opacity: 0, duration: 1, ease: "power3.out" }, "-=1");
+
+        // ScrollTrigger for Cards
+        gsap.utils.toArray('.g-card').forEach((card, i) => {
+            gsap.from(card, {
+                scrollTrigger: {
+                    trigger: card,
+                    start: "top 85%",
+                },
+                y: 100,
+                opacity: 0,
+                duration: 1.2,
+                ease: "power4.out"
+            });
+        });
+
+        // --- GOOD-FELLA STYLE MONA ---
+        let isHovering = false;
+
+        gsap.set(monaWrapper, { transformPerspective: 1200, transformStyle: "preserve-3d" });
+        gsap.set(monaImg, { transformOrigin: "center" });
+
+        // quickTo for buttery performance (like good-fella.com)
+        const xTo = gsap.quickTo(monaWrapper, "x", {duration: 1.1, ease: "power3.out"});
+        const yTo = gsap.quickTo(monaWrapper, "y", {duration: 1.1, ease: "power3.out"});
+        const rotXTo = gsap.quickTo(monaImg, "rotationX", {duration: 1.1, ease: "power3.out"});
+        const rotYTo = gsap.quickTo(monaImg, "rotationY", {duration: 1.1, ease: "power3.out"});
+
+        // Idle float
+        gsap.to(monaWrapper, { y: "+=14", duration: 4, repeat: -1, yoyo: true, ease: "sine.inOut" });
+
+        // Global mouse parallax
+        window.addEventListener("mousemove", (e) => {
+            if (isHovering) return;
+            const nx = (e.clientX / window.innerWidth - 0.5);
+            const ny = (e.clientY / window.innerHeight - 0.5);
+            xTo(nx * 40);
+            yTo(ny * 40);
+            rotYTo(nx * 15);
+            rotXTo(-ny * 15);
+        });
+
+        // Magnetic hover
+        monaWrapper.addEventListener("mousemove", (e) => {
+            const r = monaWrapper.getBoundingClientRect();
+            const dx = ((e.clientX - (r.left + r.width/2)) / (r.width/2));
+            const dy = ((e.clientY - (r.top + r.height/2)) / (r.height/2));
+            xTo(dx * 12);
+            yTo(dy * 12);
+            rotYTo(dx * 10);
+            rotXTo(-dy * 10);
+            gsap.to(monaShine, { x: dx * 30, y: dy * 30, opacity: 0.65, duration: 0.3 });
+        });
+
+        monaWrapper.addEventListener("mouseenter", () => {
+            isHovering = true;
+            gsap.to(monaImg, {
+                scale: 1.08,
+                filter: "grayscale(0%) brightness(1) contrast(1)",
+                boxShadow: "0 50px 90px rgba(0,0,0,0.75)",
+                duration: 0.6,
+                ease: "power3.out"
+            });
+            gsap.to(monaShine, { opacity: 0.85, duration: 0.4 });
+        });
+
+        monaWrapper.addEventListener("mouseleave", () => {
+            isHovering = false;
+            gsap.to(monaImg, {
+                scale: 1,
+                filter: "grayscale(100%) brightness(0.7) contrast(1.15)",
+                boxShadow: "0 30px 60px rgba(0,0,0,0.6)",
+                duration: 0.9,
+                ease: "power3.out"
+            });
+            gsap.to(monaShine, { opacity: 0, x: 0, y: 0, duration: 0.6 });
+            rotXTo(0); rotYTo(0);
+        });
+
+        // Scroll parallax - like good-fella hero
+        gsap.to(monaWrapper, {
+            yPercent: -30,
+            ease: "none",
+            scrollTrigger: {
+                trigger: ".hero",
+                start: "top top",
+                end: "bottom top",
+                scrub: 1.2
+            }
+        });
+    </script>
 </body>
 </html>
