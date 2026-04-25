@@ -118,7 +118,7 @@
             opacity: 0;
         }
 
-        /* --- MONA LISA GSAP ELEMENT --- */
+        /* --- MONA LISA CANVAS ELEMENT --- */
         .mona-wrapper {
             position: absolute;
             right: 8%;
@@ -128,8 +128,8 @@
             max-width: 420px;
             aspect-ratio: 3 / 4;
             z-index: 5;
-            perspective: 1200px; /* Crucial for the 3D tilt effect */
-            cursor: pointer;
+            perspective: 1200px;
+            cursor: crosshair;
             transform-style: preserve-3d;
             will-change: transform;
         }
@@ -137,21 +137,20 @@
         .mona-img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
             border-radius: 12px;
-            /* Default state: desaturated, slightly dimmed, high contrast */
-            filter: grayscale(100%) brightness(0.7) contrast(1.15);
+            background: #050505;
             box-shadow: 0 30px 60px rgba(0,0,0,0.6);
-            will-change: transform, filter;
+            will-change: transform;
             transform-style: preserve-3d;
+            display: block;
         }
 
         .mona-shine {
             position: absolute;
             inset: 0;
             border-radius: 12px;
-            background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.25) 0%, transparent 60%);
-            mix-blend-mode: soft-light;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 69, 0, 0.15) 0%, transparent 60%);
+            mix-blend-mode: screen;
             opacity: 0;
             pointer-events: none;
             will-change: transform, opacity;
@@ -165,7 +164,7 @@
             gap: 40px;
             position: relative;
             z-index: 10;
-            background: var(--bg); /* Prevents Mona from floating over content when scrolling */
+            background: var(--bg);
         }
 
         .section-header {
@@ -284,7 +283,7 @@
 
         @media (max-width: 900px) {
             .hero-content { width: 100%; }
-            .mona-wrapper { opacity: 0.2; right: -10%; pointer-events: none; } /* Fade to background on mobile */
+            .mona-wrapper { opacity: 0.2; right: -10%; pointer-events: none; }
         }
 
         @media (max-width: 768px) {
@@ -322,7 +321,7 @@
                 <h1 class="h-text">Headless</h1>
             </div>
             <div class="hero-title-wrapper">
-                <h1 class="h-text">Website</h1>
+                <h1 class="h-text">Architecture</h1>
             </div>
             <div class="hero-title-wrapper">
                 <h1 class="h-text">Crawler</h1>
@@ -330,9 +329,9 @@
             <p class="hero-sub">Automate visual audits. A pure python engine engineered to render GSAP interactions and destroy cookie banners natively before capture.</p>
         </div>
 
-        <!-- The Mona Lisa GSAP Element -->
         <div class="mona-wrapper">
-            <img src="assets/monalisa.jpg" alt="Mona Lisa" class="mona-img">
+            <img id="mona-source" src="assets/monalisa.jpg" alt="Mona Lisa" style="display: none;" crossorigin="anonymous">
+            <canvas id="ascii-canvas" class="mona-img"></canvas>
             <div class="mona-shine"></div>
         </div>
     </section>
@@ -397,7 +396,6 @@
         </div>
     </section>
 
-    <!-- GSAP Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.19/bundled/lenis.min.js"></script>
@@ -411,7 +409,7 @@
         gsap.registerPlugin(ScrollTrigger);
 
         const monaWrapper = document.querySelector('.mona-wrapper');
-        const monaImg = document.querySelector('.mona-img');
+        const monaImg = document.querySelector('.mona-img'); 
         const monaShine = document.querySelector('.mona-shine');
 
         // Initial Loader Timeline
@@ -421,7 +419,7 @@
           .to(".loader", { height: 0, duration: 1, ease: "power4.inOut" })
           .from(".h-text", { y: "100%", duration: 1.2, ease: "power4.out", stagger: 0.1 }, "-=0.5")
           .from(".mona-wrapper", { clipPath: "inset(0 0 100% 0)", duration: 1.4, ease: "power4.out" }, "-=1.2")
-          .from(monaImg, { scale: 1.3, filter: "grayscale(100%) brightness(0.5)", duration: 1.6, ease: "power3.out" }, "<")
+          .from(monaImg, { scale: 1.3, duration: 1.6, ease: "power3.out" }, "<")
           .to(".hero-sub", { opacity: 1, y: 0, duration: 1, ease: "power3.out" }, "-=1.2")
           .from(".nav", { y: -50, opacity: 0, duration: 1, ease: "power3.out" }, "-=1");
 
@@ -439,22 +437,19 @@
             });
         });
 
-        // --- GOOD-FELLA STYLE MONA ---
+        // --- GSAP 3D MAGNETIC HOVER ---
         let isHovering = false;
 
         gsap.set(monaWrapper, { transformPerspective: 1200, transformStyle: "preserve-3d" });
         gsap.set(monaImg, { transformOrigin: "center" });
 
-        // quickTo for buttery performance (like good-fella.com)
         const xTo = gsap.quickTo(monaWrapper, "x", {duration: 1.1, ease: "power3.out"});
         const yTo = gsap.quickTo(monaWrapper, "y", {duration: 1.1, ease: "power3.out"});
         const rotXTo = gsap.quickTo(monaImg, "rotationX", {duration: 1.1, ease: "power3.out"});
         const rotYTo = gsap.quickTo(monaImg, "rotationY", {duration: 1.1, ease: "power3.out"});
 
-        // Idle float
         gsap.to(monaWrapper, { y: "+=14", duration: 4, repeat: -1, yoyo: true, ease: "sine.inOut" });
 
-        // Global mouse parallax
         window.addEventListener("mousemove", (e) => {
             if (isHovering) return;
             const nx = (e.clientX / window.innerWidth - 0.5);
@@ -465,7 +460,6 @@
             rotXTo(-ny * 15);
         });
 
-        // Magnetic hover
         monaWrapper.addEventListener("mousemove", (e) => {
             const r = monaWrapper.getBoundingClientRect();
             const dx = ((e.clientX - (r.left + r.width/2)) / (r.width/2));
@@ -481,7 +475,6 @@
             isHovering = true;
             gsap.to(monaImg, {
                 scale: 1.08,
-                filter: "grayscale(0%) brightness(1) contrast(1)",
                 boxShadow: "0 50px 90px rgba(0,0,0,0.75)",
                 duration: 0.6,
                 ease: "power3.out"
@@ -493,7 +486,6 @@
             isHovering = false;
             gsap.to(monaImg, {
                 scale: 1,
-                filter: "grayscale(100%) brightness(0.7) contrast(1.15)",
                 boxShadow: "0 30px 60px rgba(0,0,0,0.6)",
                 duration: 0.9,
                 ease: "power3.out"
@@ -502,7 +494,6 @@
             rotXTo(0); rotYTo(0);
         });
 
-        // Scroll parallax - like good-fella hero
         gsap.to(monaWrapper, {
             yPercent: -30,
             ease: "none",
@@ -512,6 +503,129 @@
                 end: "bottom top",
                 scrub: 1.2
             }
+        });
+
+        // --- ASCII GENERATION & SPOTLIGHT ENGINE ---
+        const canvas = document.getElementById('ascii-canvas');
+        const ctx = canvas.getContext('2d');
+        const sourceImg = document.getElementById('mona-source');
+        
+        const density = "   .:-=+*#%@"; 
+        const fontSize = 6; 
+        let asciiGrid = [];
+        
+        let localMouseX = -1000;
+        let localMouseY = -1000;
+        const spotlightRadius = 140; 
+
+        function initAscii() {
+            const rect = monaWrapper.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+
+            const offscreen = document.createElement('canvas');
+            offscreen.width = canvas.width;
+            offscreen.height = canvas.height;
+            const octx = offscreen.getContext('2d');
+
+            const imgAspect = sourceImg.width / sourceImg.height;
+            const canvasAspect = canvas.width / canvas.height;
+            let drawWidth, drawHeight, offsetX = 0, offsetY = 0;
+
+            if (imgAspect > canvasAspect) {
+                drawHeight = canvas.height;
+                drawWidth = drawHeight * imgAspect;
+                offsetX = (canvas.width - drawWidth) / 2;
+            } else {
+                drawWidth = canvas.width;
+                drawHeight = drawWidth / imgAspect;
+                offsetY = (canvas.height - drawHeight) / 2;
+            }
+
+            octx.drawImage(sourceImg, offsetX, offsetY, drawWidth, drawHeight);
+            const imgData = octx.getImageData(0, 0, offscreen.width, offscreen.height);
+            const pixels = imgData.data;
+
+            asciiGrid = [];
+            for (let y = 0; y < canvas.height; y += fontSize) {
+                let row = [];
+                for (let x = 0; x < canvas.width; x += fontSize) {
+                    const index = (Math.floor(y) * canvas.width + Math.floor(x)) * 4;
+                    const r = pixels[index];
+                    const g = pixels[index + 1];
+                    const b = pixels[index + 2];
+                    
+                    const brightness = Math.min(255, (0.299 * r + 0.587 * g + 0.114 * b) * 2.0); 
+                    const charIndex = Math.floor((brightness / 255) * (density.length - 1));
+                    
+                    row.push({
+                        char: density.charAt(charIndex),
+                        x: x,
+                        y: y
+                    });
+                }
+                asciiGrid.push(row);
+            }
+            renderAscii();
+        }
+
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            localMouseX = e.clientX - rect.left;
+            localMouseY = e.clientY - rect.top;
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            localMouseX = -1000;
+            localMouseY = -1000;
+        });
+
+        function renderAscii() {
+            ctx.fillStyle = '#050505'; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.font = `bold ${fontSize}px monospace`;
+            ctx.textBaseline = 'top';
+
+            for (let i = 0; i < asciiGrid.length; i++) {
+                for (let j = 0; j < asciiGrid[i].length; j++) {
+                    const cell = asciiGrid[i][j];
+                    const dx = localMouseX - cell.x;
+                    const dy = localMouseY - cell.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    let r = 70, g = 10, b = 10; 
+
+                    if (distance < spotlightRadius) {
+                        const intensity = 1 - Math.pow(distance / spotlightRadius, 1.5); 
+                        
+                        r = 70 + (255 - 70) * intensity;
+                        g = 10 + (100 - 10) * intensity;
+                        b = 10 + (50 - 10) * intensity;
+                        
+                        if (intensity > 0.7) {
+                            let hotCenter = (intensity - 0.7) * 3.33; 
+                            g += (255 - g) * hotCenter;
+                            b += (255 - b) * hotCenter;
+                        }
+                    }
+
+                    ctx.fillStyle = `rgb(${Math.floor(r)}, ${Math.floor(g)}, ${Math.floor(b)})`;
+                    ctx.fillText(cell.char, cell.x, cell.y);
+                }
+            }
+            requestAnimationFrame(renderAscii);
+        }
+
+        if (sourceImg.complete) {
+            initAscii();
+        } else {
+            sourceImg.onload = initAscii;
+        }
+
+        window.addEventListener('resize', () => {
+            clearTimeout(window.resizeTimer);
+            window.resizeTimer = setTimeout(initAscii, 200);
         });
     </script>
 </body>
