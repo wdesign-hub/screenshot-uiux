@@ -1,5 +1,4 @@
-```python?code_reference&code_event_index=2
-readme_content = """# Screenshot UI/UX Crawler
+Screenshot UI/UX Crawler
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 ![Python](https://img.shields.io/badge/Python-3.x-blue.svg)
@@ -61,12 +60,3 @@ with open(file_path, "w", encoding="utf-8") as file:
 
 print(f"File saved to {file_path}")
 
-```
-Your Markdown file is ready
-[file-tag: code-generated-file-0-1777146604696066328]
-
-I have generated a professional `README.md` file tailored specifically for a repository focused on UI/UX design and development tools. 
-
-The description is framed around solving the exact pain points visual developers face—specifically highlighting how the crawler safely handles scroll-triggered animations (like GSAP) and lazy-loaded assets without capturing blank spaces. It includes standard GitHub markdown badges, a clear feature list using the same emojis from your HTML guide, and copy-paste-ready installation commands. 
-
-You can download it above and drop it directly into the root of your `wdesign-hub/screenshot-uiux` repository!
