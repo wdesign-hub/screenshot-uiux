@@ -510,7 +510,8 @@
         const ctx = canvas.getContext('2d');
         const sourceImg = document.getElementById('mona-source');
         
-        const density = "   .:-=+*#%@"; 
+        // Added more blank spaces to the front of the string to represent 'empty air'
+        const density = "        .:-=+*#%@"; 
         const fontSize = 6; 
         let asciiGrid = [];
         
@@ -555,11 +556,24 @@
                     const g = pixels[index + 1];
                     const b = pixels[index + 2];
                     
-                    const brightness = Math.min(255, (0.299 * r + 0.587 * g + 0.114 * b) * 2.0); 
-                    const charIndex = Math.floor((brightness / 255) * (density.length - 1));
+                    // 1. Calculate the raw, unboosted luminance of the pixel
+                    const luminance = (0.299 * r + 0.587 * g + 0.114 * b);
+                    
+                    // 2. THE FIX: The Shadow Floor Threshold.
+                    // Any pixel with a brightness lower than this gets forced to be blank space.
+                    const darkThreshold = 45; 
+                    
+                    let charToPush = ' ';
+
+                    if (luminance > darkThreshold) {
+                        // If it passes the threshold (it's part of her face/body), boost it and map it
+                        const boostedBrightness = Math.min(255, luminance * 2.2); 
+                        const charIndex = Math.floor((boostedBrightness / 255) * (density.length - 1));
+                        charToPush = density.charAt(charIndex);
+                    }
                     
                     row.push({
-                        char: density.charAt(charIndex),
+                        char: charToPush,
                         x: x,
                         y: y
                     });
